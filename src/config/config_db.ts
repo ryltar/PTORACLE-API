@@ -1,10 +1,7 @@
-const hrPool = {
+export const hrPool = {
     user: 'SYSTEM',
-    password: 'SYSTEM',
+    password: 'admin',
     connectString: "localhost/XE",
-    poolMin: 10,
-    poolMax: 10,
-    poolIncrement: 0
-}
+    applicationExpress : "TOURISTIQUE"
 
-export default hrPool
+};
