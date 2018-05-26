@@ -1,7 +1,7 @@
 export const hrPool = {
     user: 'SYSTEM',
-    password: 'SYSTEM',
+    password: 'admin',
     connectString: "localhost/XE",
-    applicationExpress : "PROJET_ORACLE"
+    applicationExpress : "TOURISTIQUE"
 
 };
