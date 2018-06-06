@@ -1,7 +1,7 @@
 import {Controller, Delete, Get, PathParams} from "@tsed/common";
 import * as Express from "express";
 import {ILieuAVisiter} from "../interfaces/LieuAVisiter";
-import {onlyOneExecution} from "../database/execute";
+import {getExecution, deleteExecution} from "../database/execute";
 const oracledb = require('oracledb');
 
 @Controller("/lieux")
@@ -17,12 +17,12 @@ export class LieuAVisiterCtrl {
      * @returns {{id: any, name: string}}
      */
     @Get("/")
-    async getAll(request: Express.Request,
-                 response: Express.Response): Promise<Array<ILieuAVisiter>|any> {
-        let lieux = await onlyOneExecution("SELECT * from LieuAVisiter",
+    async getAll(): Promise<Array<ILieuAVisiter>|any> {
+        let lieux = await getExecution("SELECT * from LieuAVisiter",
             null)
             .then((response) => {
             let temps = [];
+            console.log(response);
             for(let index in response){
                 let lieu:ILieuAVisiter;
                 try {
@@ -44,15 +44,23 @@ export class LieuAVisiterCtrl {
         return lieux;
     }
 
+    /**
+     * Return a specific place
+     * 
+     * @param lieu 
+     * @param ville 
+     * @param pays 
+     * @returns {lieux}
+     */
     @Get("/:lieu/:ville/:pays")
     async getOne(@PathParams('lieu') lieu:string, @PathParams('ville') ville:string,
                  @PathParams('pays') pays:string): Promise<ILieuAVisiter|any> {
-        let lieux = await onlyOneExecution("SELECT * from LieuAVisiter" +
+        let lieux = await getExecution("SELECT * from LieuAVisiter" +
             " WHERE nomLieu = :lieu AND ville = :ville AND pays = :pays ",
             [lieu,ville,pays])
             .then((response) => {
                 let lieu:ILieuAVisiter = <ILieuAVisiter>{};
-                if(response.rows.size() > 0){
+                if(response.rows.length > 0){
                     lieu = <ILieuAVisiter> {
                         nomLieu: response.rows[0][0],
                         ville: response.rows[0][1],
@@ -71,10 +79,76 @@ export class LieuAVisiterCtrl {
         return lieux;
     }
 
+    /**
+     * Return some places in a specific city
+     * 
+     * @param ville 
+     * @returns {lieux}
+     */
+    @Get("/ville/:ville")
+    async getPerCity(@PathParams('ville') ville:string): Promise<ILieuAVisiter|any> {
+        let lieux = await getExecution("SELECT * from LieuAVisiter" +
+            " WHERE ville = :ville ", [ville])
+            .then((response) => {
+                let temps = [];
+                for (let index in response) {
+                    let lieu:ILieuAVisiter;
+                    try {
+                        lieu = <ILieuAVisiter> {
+                            nomLieu: response[index][0],
+                            ville: response[index][1],
+                            pays: response[index][2],
+                            descriptif: response[index][3],
+                            prixVisite: response[index][4]
+                        };
+                        temps.push(lieu);
+                    }
+                    catch {
+                        return {error:'Il n\'y a aucun lieu dans cette ville'};
+                    }
+                }
+                return temps;
+            });
+            return lieux;
+        }
+
+        /**
+         * Return some places in a specific country
+         * 
+         * @param pays 
+         * @returns {lieux}
+         */
+        @Get("/pays/:pays")
+        async getPerCountry(@PathParams('pays') pays:string): Promise<ILieuAVisiter|any> {
+            let lieux = await getExecution("SELECT * from LieuAVisiter" +
+                " WHERE pays = :pays ", [pays])
+                .then((response) => {
+                    let temps = [];
+                    for (let index in response) {
+                        let lieu:ILieuAVisiter;
+                        try {
+                            lieu = <ILieuAVisiter> {
+                                nomLieu: response[index][0],
+                                ville: response[index][1],
+                                pays: response[index][2],
+                                descriptif: response[index][3],
+                                prixVisite: response[index][4]
+                            };
+                            temps.push(lieu);
+                        }
+                        catch {
+                            return {error:'Il n\'y a aucun lieu dans ce pays'};
+                        }
+                    }
+                    return temps;
+                });
+                return lieux;
+            }
+
     @Delete("/:lieu/:ville/:pays")
     async delete(@PathParams('lieu') lieu:string, @PathParams('ville') ville:string,
                  @PathParams('pays') pays:string): Promise<ILieuAVisiter|any> {
-        let lieux = await onlyOneExecution("DELETE from LieuAVisiter" +
+        let lieux = await deleteExecution("DELETE from LieuAVisiter" +
             " WHERE nomLieu = :lieu AND ville = :ville AND pays = :pays",
             [lieu,ville,pays])
             .then((response) => {

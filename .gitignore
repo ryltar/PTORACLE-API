@@ -61,3 +61,5 @@ typings/
 .next
 dist/
 .idea/
+
+src/config/config_db.ts
