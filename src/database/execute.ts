@@ -5,7 +5,6 @@ export async function getExecution(command:string, params:any): Promise<any> {
     return new Promise((resolve, reject) => {
         let result = getConnection().then( (connection:any)=>{
             if(params){
-                console.log(params);
                 connection.execute(
                     command,
                     params,
@@ -17,7 +16,6 @@ export async function getExecution(command:string, params:any): Promise<any> {
                         resolve(result);
                     })
             }else{
-                console.log("SUPERMAN");
                 connection.execute(
                     command,
                     function(err, result) {
@@ -49,7 +47,6 @@ export async function deleteExecution(command:string, params:any): Promise<any> 
                         resolve(result);
                     })
             }else{
-                console.log("SUPERMAN");
                 connection.execute(
                     command,
                     {autoCommit: true},
@@ -62,6 +59,25 @@ export async function deleteExecution(command:string, params:any): Promise<any> 
 
                     })
             }
+        });
+    })
+}
+
+export async function postExecution(command:string, params:any ): Promise<any> {
+    return new Promise((resolve, reject) => {
+        let result = getConnection().then((connection:any)=>{
+            connection.execute(
+                command,
+                params,
+                {autoCommit: true},
+                function(err, result) {
+                    if (err) {
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    resolve(result);
+                }
+            )
         });
     })
 }

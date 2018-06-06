@@ -1,7 +1,7 @@
-import {Controller, Delete, Get, PathParams} from "@tsed/common";
+import {Controller, Delete, Get, Post, PathParams, BodyParams} from "@tsed/common";
 import * as Express from "express";
 import {ILieuAVisiter} from "../interfaces/LieuAVisiter";
-import {getExecution, deleteExecution} from "../database/execute";
+import {getExecution, deleteExecution, postExecution} from "../database/execute";
 const oracledb = require('oracledb');
 
 @Controller("/lieux")
@@ -42,6 +42,30 @@ export class LieuAVisiterCtrl {
             return temps;
         });
         return lieux;
+    }
+    
+    /**
+     * Create a place to visit
+     * 
+     * @param nomlieu 
+     * @param ville 
+     * @param pays 
+     * @param descriptif 
+     * @param prixvisite
+     * @return {success}
+     */
+    @Post("/")
+    async creatOne(@BodyParams('nomlieu') nomlieu:string, @BodyParams('ville') ville:string,
+                    @BodyParams('pays') pays:string, @BodyParams('descriptif') descriptif:string,
+                    @BodyParams('prixvisite') prixvisite:number): Promise<any> {
+        let lieu = await postExecution("INSERT INTO lieuavisiter (nomlieu, ville, pays, descriptif, prixvisite)" + 
+                                        " VALUES (:nomlieu, :ville, :pays, :descriptif, :prixvisite) ", [nomlieu, ville, pays, descriptif, prixvisite])
+            .then((response) => {
+                return {success: true}
+            }, (reject) => {
+                return {success: false}
+            })
+        return lieu
     }
 
     /**
