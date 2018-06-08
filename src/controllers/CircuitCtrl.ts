@@ -13,7 +13,7 @@ export class CircuitCtrl {
     @Get("/")
     async getAll(): Promise<Array<ICircuit[]>|any> {
         let tab = [];
-        let circuits = await getExecution("SELECT * from Circuit", null)
+        let circuits = await getExecution("SELECT * from Circuit",[])
         if (circuits.length == 0) return 607
         for(let index in circuits.rows){
             let circuit = new Circuit(circuits.rows[index][0], circuits.rows[index][1], circuits.rows[index][2], circuits.rows[index][3], circuits.rows[index][4],
