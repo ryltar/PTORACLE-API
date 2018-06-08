@@ -20,15 +20,15 @@ export class LieuAVisiterCtrl {
             .then((response) => {
             let temps = [];
             console.log(response);
-            for(let index in response){
+            for(let index in response.rows){
                 let lieu:ILieuAVisiter;
                 try {
                     lieu = <ILieuAVisiter> {
-                        nomLieu: response[index][0],
-                        ville: response[index][1],
-                        pays: response[index][2],
-                        descriptif: response[index][3],
-                        prixVisite: response[index][4]
+                        nomLieu: response.rows[index][0],
+                        ville: response.rows[index][1],
+                        pays: response.rows[index][2],
+                        descriptif: response.rows[index][3],
+                        prixVisite: response.rows[index][4]
                     };
                     temps.push(lieu);
                 }
