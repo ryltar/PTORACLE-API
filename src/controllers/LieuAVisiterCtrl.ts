@@ -1,17 +1,14 @@
-import {Controller, Delete, Get, Post, PathParams, BodyParams} from "@tsed/common";
+import {Controller, Delete, Get, Post, Put, PathParams, BodyParams} from "@tsed/common";
 import * as Express from "express";
 import {ILieuAVisiter} from "../interfaces/LieuAVisiter";
-import {getExecution, deleteExecution, postExecution} from "../database/execute";
+import {getExecution, deleteExecution, postExecution, putExecution} from "../database/execute";
 const oracledb = require('oracledb');
 
 @Controller("/lieux")
 export class LieuAVisiterCtrl {
     /**
-     * Example of classic call. Use `@Get` for routing a request to your method.
-     * In this case, this route "/calendars/:id" are mounted on the "rest/" path.
-     *
-     * By default, the response is sent with status 200 and is serialized in JSON.
-     *
+     * get all places to visit
+     * 
      * @param request
      * @param response
      * @returns {{id: any, name: string}}
@@ -52,24 +49,54 @@ export class LieuAVisiterCtrl {
      * @param pays 
      * @param descriptif 
      * @param prixvisite
-     * @return {success}
+     * @return {lieu}
      */
     @Post("/")
     async creatOne(@BodyParams('nomlieu') nomlieu:string, @BodyParams('ville') ville:string,
                     @BodyParams('pays') pays:string, @BodyParams('descriptif') descriptif:string,
-                    @BodyParams('prixvisite') prixvisite:number): Promise<any> {
+                    @BodyParams('prixvisite') prixvisite:number): Promise<number> {
         let lieu = await postExecution("INSERT INTO lieuavisiter (nomlieu, ville, pays, descriptif, prixvisite)" + 
                                         " VALUES (:nomlieu, :ville, :pays, :descriptif, :prixvisite) ", [nomlieu, ville, pays, descriptif, prixvisite])
             .then((response) => {
-                return {success: true}
+                return 200
             }, (reject) => {
-                return {success: false}
+                return 402
             })
         return lieu
     }
 
     /**
-     * Return a specific place
+     * Update a place to visit
+     * 
+     * @param lieu 
+     * @param ville 
+     * @param pays 
+     * @param body 
+     * @return {newLieu}
+     */
+    @Put("/:lieu/:ville/:pays")
+    async updateOne(@PathParams('lieu') lieu:string, @PathParams('ville') ville:string,
+                    @PathParams('pays') pays:string, @BodyParams() body:any): Promise<any> {
+        console.log(body);
+        var command = "UPDATE lieuavisiter SET";
+        for (var key in body) {
+            console.log(`${key} = ${body[key]}`);
+            command += ` ${key} = '${body[key]}',`
+        }
+        command = command.substring(0, command.length-1);
+        command += ` WHERE nomlieu = '${lieu}' AND ville = '${ville}' AND pays = '${pays}'`
+        console.log(command);
+        let newLieu = await putExecution(command)
+            .then((response) => {
+                return 200
+            }, (reject) => {
+                return 402
+            })
+        return newLieu                
+    }
+
+    /**
+     * Return a specific place to visit
      * 
      * @param lieu 
      * @param ville 
@@ -104,7 +131,7 @@ export class LieuAVisiterCtrl {
     }
 
     /**
-     * Return some places in a specific city
+     * Return some places to visit in a specific city
      * 
      * @param ville 
      * @returns {lieux}
@@ -137,7 +164,7 @@ export class LieuAVisiterCtrl {
         }
 
         /**
-         * Return some places in a specific country
+         * Return some places to visit in a specific country
          * 
          * @param pays 
          * @returns {lieux}
@@ -169,6 +196,14 @@ export class LieuAVisiterCtrl {
                 return lieux;
             }
 
+    /**
+     * delete a specific place
+     * 
+     * @param lieu 
+     * @param ville 
+     * @param pays 
+     * @return {lieux}
+     */
     @Delete("/:lieu/:ville/:pays")
     async delete(@PathParams('lieu') lieu:string, @PathParams('ville') ville:string,
                  @PathParams('pays') pays:string): Promise<ILieuAVisiter|any> {

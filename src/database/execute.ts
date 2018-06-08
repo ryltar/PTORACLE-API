@@ -82,5 +82,24 @@ export async function postExecution(command:string, params:any ): Promise<any> {
     })
 }
 
+export async function putExecution(command:string): Promise<any> {
+    return new Promise((resolve, reject) => {
+        let result = getConnection().then((connection:any)=>{
+            connection.execute(
+                command,
+                [],
+                {autoCommit: true},
+                function(err, result) {
+                    if (err) {
+                        console.error(err.message);
+                        reject(err.message);
+                    }
+                    resolve(result);
+                }
+            )
+        });
+    })
+}
+
 
 
