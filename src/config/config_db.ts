@@ -1,6 +1,6 @@
 export const hrPool = {
     user: 'SYSTEM',
-    password: 'admin',
+    password: 'password',
     connectString: "localhost/XE",
     applicationExpress : "TOURISTIQUE"
 
