@@ -4,8 +4,8 @@ import Path = require("path");
 @ServerSettings({
     rootDir: Path.resolve(__dirname),
     acceptMimes: ["application/json"],
-    httpPort : 5000,
-    httpsPort: 5080,
+    httpPort : 7000,
+    httpsPort: 7080,
 })
 export class Server extends ServerLoader {
 
