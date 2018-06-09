@@ -10,8 +10,7 @@ export class PersonneCtrl {
      */
     @Get("/")
     async getAll(): Promise<Array<IPersonne[]>|any> {
-        let personnes = await getExecution("SELECT * from Personne",
-            []);
+        let personnes = await getExecution("SELECT * from Personne", []);
         let data = [];
         if(personnes.length == 0) return 607;
         for (let index in personnes.rows) {
