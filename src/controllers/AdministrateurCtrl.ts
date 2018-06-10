@@ -2,7 +2,7 @@ import {Controller, Delete, Get, Post, Put, PathParams, BodyParams} from "@tsed/
 import * as Express from "express";
 import {IAdministrateur, Administrateur} from "../interfaces/Administrateur";
 import {Personne} from "../interfaces/Personne";
-import {getExecution, deleteExecution, postExecution, putExecution} from "../database/execute";
+import {doExecution} from "../database/execute";
 const oracledb = require('oracledb');
 
 @Controller('/admin')
@@ -14,7 +14,7 @@ export class AdministrateurCtrl {
     @Get("/")
     async getAll(): Promise<Array<IAdministrateur[]>|any> {
         let tab = [];
-        let admins = await getExecution("SELECT * from personne INNER JOIN administrateur ON administrateur.idadministrateur = personne.idpersonne",[])
+        let admins = await doExecution("SELECT * from personne INNER JOIN administrateur ON administrateur.idadministrateur = personne.idpersonne",[])
         if (admins.length == 0) return 607
         for(let index in admins.rows){
             let admin = new Personne(admins.rows[0][0], admins.rows[0][1], admins.rows[0][2], admins.rows[0][3], admins.rows[0][4], admins.rows[0][5])
@@ -30,7 +30,7 @@ export class AdministrateurCtrl {
      */
     @Get("/:identifiant")
     async getOne(@PathParams('identifiant') identifiant:string): Promise<IAdministrateur|any> {
-        let admins = await getExecution("SELECT * from personne INNER JOIN administrateur ON administrateur.idadministrateur = personne.idpersonne WHERE idadministrateur = :identifiant ", [identifiant])
+        let admins = await doExecution("SELECT * from personne INNER JOIN administrateur ON administrateur.idadministrateur = personne.idpersonne WHERE idadministrateur = :identifiant ", [identifiant])
         if (admins.length == 0) return 607
         let admin = new Personne(admins.rows[0][0], admins.rows[0][1], admins.rows[0][2], admins.rows[0][3], admins.rows[0][4], admins.rows[0][5])
         return admin
@@ -43,7 +43,7 @@ export class AdministrateurCtrl {
      */
     @Post("/")
     async creatOne(@BodyParams() body:any): Promise<number> {
-        await postExecution("INSERT INTO administrateur (idadministrateur) VALUES (:idadministrateur) ", [body.idadministrateur])
+        await doExecution("INSERT INTO administrateur (idadministrateur) VALUES (:idadministrateur) ", [body.idadministrateur])
         return 200
     }
 
@@ -54,7 +54,7 @@ export class AdministrateurCtrl {
      */
     @Delete("/:identifiant")
     async delete(@PathParams('identifiant') identifiant:string): Promise<number> {
-        await deleteExecution("DELETE from administrateur WHERE idadministrateur = :identifiant", [identifiant])
+        await doExecution("DELETE from administrateur WHERE idadministrateur = :identifiant", [identifiant])
         return 200
     }
 }

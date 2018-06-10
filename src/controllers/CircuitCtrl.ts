@@ -1,7 +1,7 @@
 import {Controller, Delete, Get, Post, Put, PathParams, BodyParams} from "@tsed/common";
 import * as Express from "express";
 import {ICircuit, Circuit} from "../interfaces/Circuit";
-import {getExecution, deleteExecution, postExecution, putExecution} from "../database/execute";
+import {doExecution} from "../database/execute";
 const oracledb = require('oracledb');
 
 @Controller('/circuit')
@@ -13,7 +13,7 @@ export class CircuitCtrl {
     @Get("/")
     async getAll(): Promise<Array<ICircuit[]>|any> {
         let tab = [];
-        let circuits = await getExecution("SELECT * from Circuit",[])
+        let circuits = await doExecution("SELECT * from Circuit",[])
         if (circuits.length == 0) return 607
         for(let index in circuits.rows){
             let circuit = new Circuit(circuits.rows[index][0], circuits.rows[index][1], circuits.rows[index][2], circuits.rows[index][3], circuits.rows[index][4],
@@ -29,7 +29,7 @@ export class CircuitCtrl {
      */
     @Get("/:identifiant")
     async getOne(@PathParams('identifiant') identifiant:string): Promise<ICircuit|any> {
-        let circuits = await getExecution("SELECT * from Circuit" + " WHERE identifiantcircuit = :identifiant ", [identifiant])
+        let circuits = await doExecution("SELECT * from Circuit" + " WHERE identifiantcircuit = :identifiant ", [identifiant])
         if (circuits.length == 0) return 607
         let circuit = new Circuit(circuits.rows[0][0], circuits.rows[0][1], circuits.rows[0][2], circuits.rows[0][3], circuits.rows[0][4], circuits.rows[0][5],
             circuits.rows[0][6], circuits.rows[0][7], circuits.rows[0][8], circuits.rows[0][9], circuits.rows[0][10])
@@ -43,7 +43,7 @@ export class CircuitCtrl {
      */
     @Post("/")
     async creatOne(@BodyParams() body:any): Promise<number> {
-        await postExecution("INSERT INTO circuit (descriptif, villedepart, paysdepart, villearrivee, paysarrivee, datedepart, nbrplacedispo, duree, prixinscription, titre)" + 
+        await doExecution("INSERT INTO circuit (descriptif, villedepart, paysdepart, villearrivee, paysarrivee, datedepart, nbrplacedispo, duree, prixinscription, titre)" +
                                         " VALUES (:descriptif, :villedepart, :paysdepart, :villearrivee, :paysarrivee, to_date(:datedepart), :nbrplacedispo, :duree, :prixinscription, :titre) ",
                                         [body.descriptif, body.villedepart, body.paysdepart, body.villearrivee, body.paysarrivee, body.datedepart, body.nbrplacedispo, body.duree, body.prixinscription, body.titre])
         return 200
@@ -65,7 +65,7 @@ export class CircuitCtrl {
         command = command.substring(0, command.length-1);
         command += ` WHERE identifiantcircuit = '${identifiant}'`
         console.log(command);
-        await putExecution(command)
+        await doExecution(command, [])
         return 200            
     }
 
@@ -75,7 +75,7 @@ export class CircuitCtrl {
      */
     @Delete("/:identifiant")
     async delete(@PathParams('identifiant') identifiant:string): Promise<number> {
-        let lieux = await deleteExecution("DELETE from Circuit" +
+        let lieux = await doExecution("DELETE from Circuit" +
             " WHERE identifiantcircuit = :identifiant",
             [identifiant])
         return 200

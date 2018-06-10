@@ -1,6 +1,6 @@
 import {Controller, Delete, Get, Post, Put, PathParams, BodyParams} from "@tsed/common";
 import {IPersonne, Personne} from "../interfaces/Personne";
-import {getExecution, deleteExecution, postExecution, putExecution} from "../database/execute";
+import {doExecution} from "../database/execute";
 
 @Controller("/personnes")
 export class PersonneCtrl {
@@ -10,7 +10,7 @@ export class PersonneCtrl {
      */
     @Get("/")
     async getAll(): Promise<Array<IPersonne[]>|any> {
-        let personnes = await getExecution("SELECT * from Personne", []);
+        let personnes = await doExecution("SELECT * from Personne", []);
         let data = [];
         if(personnes.length == 0) return 607;
         for (let index in personnes.rows) {
@@ -28,7 +28,7 @@ export class PersonneCtrl {
      */
     @Get("/:identifiant")
     async getOne(@PathParams('identifiant') identifiant:string): Promise<IPersonne|any> {
-        let personnes = await getExecution("SELECT * from personne" + " WHERE idpersonne = :identifiant ", [identifiant])
+        let personnes = await doExecution("SELECT * from personne" + " WHERE idpersonne = :identifiant ", [identifiant])
         if (personnes.length == 0) return 607
         let personne = new Personne(personnes.rows[0][0], personnes.rows[0][1], personnes.rows[0][2], personnes.rows[0][3], personnes.rows[0][4], personnes.rows[0][5])
         return personne
@@ -41,7 +41,7 @@ export class PersonneCtrl {
      */
     @Post("/")
     async creatOne(@BodyParams() body:any): Promise<number> {
-        await postExecution("INSERT INTO personne (nom, prenom, dateNaissance, login, mdp)" + 
+        await doExecution("INSERT INTO personne (nom, prenom, dateNaissance, login, mdp)" +
                                         " VALUES (:nom, :prenom, to_date(:dateNaissance), :login, :mdp) ",
                                         [body.nom, body.prenom, body.dateNaissance, body.login, body.mdp])
         return 200
@@ -62,7 +62,7 @@ export class PersonneCtrl {
         }
         command = command.substring(0, command.length-1);
         command += ` WHERE idpersonne = '${identifiant}'`
-        await putExecution(command)
+        await doExecution(command, [])
         return 200            
     }
 
@@ -73,7 +73,7 @@ export class PersonneCtrl {
      */
     @Delete("/:identifiant")
     async delete(@PathParams('identifiant') identifiant:string): Promise<number> {
-    await deleteExecution("DELETE from personne" +
+    await doExecution("DELETE from personne" +
             " WHERE idpersonne = :identifiant", [identifiant])
     return 200
     }

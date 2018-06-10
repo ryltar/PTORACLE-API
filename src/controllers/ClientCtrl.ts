@@ -2,7 +2,7 @@ import {Controller, Delete, Get, Post, Put, PathParams, BodyParams} from "@tsed/
 import * as Express from "express";
 import {IClient, Client} from "../interfaces/Client";
 import {Personne} from "../interfaces/Personne";
-import {getExecution, deleteExecution, postExecution, putExecution} from "../database/execute";
+import {doExecution} from "../database/execute";
 const oracledb = require('oracledb');
 
 @Controller('/client')
@@ -15,7 +15,7 @@ export class ClientCtrl {
     @Get("/")
     async getAll(): Promise<Array<IClient[]>|any> {
         let tab = [];
-        let clients = await getExecution("SELECT * from personne INNER JOIN client ON client.idclient = personne.idpersonne",[])
+        let clients = await doExecution("SELECT * from personne INNER JOIN client ON client.idclient = personne.idpersonne",[])
         if (clients.length == 0) return 607
         for(let index in clients.rows){
             let client = new Personne(clients.rows[0][0], clients.rows[0][1], clients.rows[0][2], clients.rows[0][3], clients.rows[0][4], clients.rows[0][5])
@@ -31,7 +31,7 @@ export class ClientCtrl {
      */
     @Get("/:identifiant")
     async getOne(@PathParams('identifiant') identifiant:string): Promise<IClient|any> {
-        let clients = await getExecution("SELECT * from personne INNER JOIN client ON client.idclient = personne.idpersonne WHERE idclient = :identifiant ", [identifiant])
+        let clients = await doExecution("SELECT * from personne INNER JOIN client ON client.idclient = personne.idpersonne WHERE idclient = :identifiant ", [identifiant])
         if (clients.length == 0) return 607
         let client = new Personne(clients.rows[0][0], clients.rows[0][1], clients.rows[0][2], clients.rows[0][3], clients.rows[0][4], clients.rows[0][5])
         return client
@@ -44,7 +44,7 @@ export class ClientCtrl {
      */
     @Post("/")
     async creatOne(@BodyParams() body:any): Promise<number> {
-        await postExecution("INSERT INTO client (idclient) VALUES (:idclient) ", [body.idclient])
+        await doExecution("INSERT INTO client (idclient) VALUES (:idclient) ", [body.idclient])
         return 200
     }
 
@@ -55,7 +55,7 @@ export class ClientCtrl {
      */
     @Delete("/:identifiant")
     async delete(@PathParams('identifiant') identifiant:string): Promise<number> {
-        await deleteExecution("DELETE from client WHERE idclient = :identifiant", [identifiant])
+        await doExecution("DELETE from client WHERE idclient = :identifiant", [identifiant])
         return 200
     }
 }

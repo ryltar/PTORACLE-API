@@ -1,7 +1,6 @@
 import {Controller, Delete, Get, Post, Put, PathParams, BodyParams} from "@tsed/common";
-import * as Express from "express";
 import {ILieuAVisiter} from "../interfaces/LieuAVisiter";
-import {getExecution, deleteExecution, postExecution, putExecution} from "../database/execute";
+import {doExecution} from "../database/execute";
 const oracledb = require('oracledb');
 
 @Controller("/lieux")
@@ -15,8 +14,8 @@ export class LieuAVisiterCtrl {
      */
     @Get("/")
     async getAll(): Promise<Array<ILieuAVisiter>|any> {
-        let lieux = await getExecution("SELECT * from LieuAVisiter",
-            null)
+        let lieux = await doExecution("SELECT * from LieuAVisiter",
+            [])
             .then((response) => {
             let temps = [];
             console.log(response);
@@ -55,7 +54,7 @@ export class LieuAVisiterCtrl {
     async creatOne(@BodyParams('nomlieu') nomlieu:string, @BodyParams('ville') ville:string,
                     @BodyParams('pays') pays:string, @BodyParams('descriptif') descriptif:string,
                     @BodyParams('prixvisite') prixvisite:number): Promise<number> {
-        let lieu = await postExecution("INSERT INTO lieuavisiter (nomlieu, ville, pays, descriptif, prixvisite)" + 
+        let lieu = await doExecution("INSERT INTO lieuavisiter (nomlieu, ville, pays, descriptif, prixvisite)" +
                                         " VALUES (:nomlieu, :ville, :pays, :descriptif, :prixvisite) ", [nomlieu, ville, pays, descriptif, prixvisite])
             .then((response) => {
                 return 200
@@ -86,7 +85,7 @@ export class LieuAVisiterCtrl {
         command = command.substring(0, command.length-1);
         command += ` WHERE nomlieu = '${lieu}' AND ville = '${ville}' AND pays = '${pays}'`
         console.log(command);
-        let newLieu = await putExecution(command)
+        let newLieu = await doExecution(command, [])
             .then((response) => {
                 return 200
             }, (reject) => {
@@ -106,7 +105,7 @@ export class LieuAVisiterCtrl {
     @Get("/:lieu/:ville/:pays")
     async getOne(@PathParams('lieu') lieu:string, @PathParams('ville') ville:string,
                  @PathParams('pays') pays:string): Promise<ILieuAVisiter|any> {
-        let lieux = await getExecution("SELECT * from LieuAVisiter" +
+        let lieux = await doExecution("SELECT * from LieuAVisiter" +
             " WHERE nomLieu = :lieu AND ville = :ville AND pays = :pays ",
             [lieu,ville,pays])
             .then((response) => {
@@ -138,7 +137,7 @@ export class LieuAVisiterCtrl {
      */
     @Get("/ville/:ville")
     async getPerCity(@PathParams('ville') ville:string): Promise<ILieuAVisiter|any> {
-        let lieux = await getExecution("SELECT * from LieuAVisiter" +
+        let lieux = await doExecution("SELECT * from LieuAVisiter" +
             " WHERE ville = :ville ", [ville])
             .then((response) => {
                 let temps = [];
@@ -171,7 +170,7 @@ export class LieuAVisiterCtrl {
          */
         @Get("/pays/:pays")
         async getPerCountry(@PathParams('pays') pays:string): Promise<ILieuAVisiter|any> {
-            let lieux = await getExecution("SELECT * from LieuAVisiter" +
+            let lieux = await doExecution("SELECT * from LieuAVisiter" +
                 " WHERE pays = :pays ", [pays])
                 .then((response) => {
                     let temps = [];
@@ -207,7 +206,7 @@ export class LieuAVisiterCtrl {
     @Delete("/:lieu/:ville/:pays")
     async delete(@PathParams('lieu') lieu:string, @PathParams('ville') ville:string,
                  @PathParams('pays') pays:string): Promise<ILieuAVisiter|any> {
-        let lieux = await deleteExecution("DELETE from LieuAVisiter" +
+        let lieux = await doExecution("DELETE from LieuAVisiter" +
             " WHERE nomLieu = :lieu AND ville = :ville AND pays = :pays",
             [lieu,ville,pays])
             .then((response) => {
